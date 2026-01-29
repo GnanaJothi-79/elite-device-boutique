@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Smartphone, 
   Laptop, 
@@ -37,6 +38,12 @@ const itemVariants = {
 };
 
 const Categories = () => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (categoryName: string) => {
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
+  };
+
   return (
     <section className="py-16 bg-secondary/30">
       <div className="container mx-auto px-4">
@@ -62,13 +69,13 @@ const Categories = () => {
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6"
         >
           {categories.map((category) => (
-            <motion.a
+            <motion.button
               key={category.name}
-              href="#"
+              onClick={() => handleCategoryClick(category.name)}
               variants={itemVariants}
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.98 }}
-              className="group relative bg-card rounded-2xl p-6 border border-border hover:border-primary/50 transition-all duration-300 overflow-hidden"
+              className="group relative bg-card rounded-2xl p-6 border border-border hover:border-primary/50 transition-all duration-300 overflow-hidden text-left"
             >
               {/* Gradient Background on Hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
@@ -98,7 +105,7 @@ const Categories = () => {
                   </svg>
                 </div>
               </motion.div>
-            </motion.a>
+            </motion.button>
           ))}
         </motion.div>
       </div>

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Star, Heart, ShoppingCart, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   id: number;
@@ -16,6 +17,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ 
+  id,
   name, 
   image, 
   price, 
@@ -25,6 +27,18 @@ const ProductCard = ({
   badge,
   discount 
 }: ProductCardProps) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      name,
+      image,
+      price,
+      originalPrice,
+    });
+  };
+
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -110,7 +124,7 @@ const ProductCard = ({
         </div>
 
         {/* Add to Cart Button */}
-        <Button className="w-full btn-accent rounded-xl group/btn">
+        <Button onClick={handleAddToCart} className="w-full btn-accent rounded-xl group/btn">
           <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-bounce-subtle" />
           Add to Cart
         </Button>

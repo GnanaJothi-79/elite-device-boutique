@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   ShoppingCart, 
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/context/CartContext';
 
 const categories = [
   { name: 'Smartphones', icon: Smartphone },
@@ -32,7 +34,27 @@ const categories = [
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [cartCount] = useState(3);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const { totalItems, setIsCartOpen } = useCart();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
+    setIsCategoryOpen(false);
+    setIsMenuOpen(false);
+  };
+
+  const handleLogoClick = () => {
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -41,7 +63,7 @@ const Header = () => {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <span>🚀 Free shipping on orders over $50 | Same day delivery available</span>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-accent transition-colors">Track Order</a>
+            <button onClick={() => navigate('/cart')} className="hover:text-accent transition-colors">Track Order</button>
             <a href="#" className="hover:text-accent transition-colors">Help & Support</a>
           </div>
         </div>
@@ -52,10 +74,11 @@ const Header = () => {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <motion.div 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
+            onClick={handleLogoClick}
           >
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xl">G</span>
@@ -84,17 +107,17 @@ const Header = () => {
                   className="absolute top-full left-0 mt-2 w-64 bg-card rounded-xl shadow-lg border border-border overflow-hidden z-50"
                 >
                   {categories.map((category, index) => (
-                    <motion.a
+                    <motion.button
                       key={category.name}
-                      href="#"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-secondary transition-colors"
+                      onClick={() => handleCategoryClick(category.name)}
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition-colors text-left"
                     >
                       <category.icon className="w-5 h-5 text-primary" />
                       <span className="text-foreground">{category.name}</span>
-                    </motion.a>
+                    </motion.button>
                   ))}
                 </motion.div>
               )}
@@ -108,19 +131,24 @@ const Header = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search for gadgets, brands, categories..."
-                className="search-input w-full pr-12"
-              />
-              <Button 
-                size="sm" 
-                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full btn-primary"
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for gadgets, brands, categories..."
+                  className="search-input w-full pr-12"
+                />
+                <Button 
+                  type="submit"
+                  size="sm" 
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full btn-primary"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
           </motion.div>
 
           {/* Right Icons */}
@@ -134,11 +162,16 @@ const Header = () => {
               <Heart className="w-5 h-5" />
             </Button>
             
-            <Button variant="ghost" size="icon" className="relative text-foreground hover:bg-secondary">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative text-foreground hover:bg-secondary"
+              onClick={() => setIsCartOpen(true)}
+            >
               <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
+              {totalItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 bg-accent text-accent-foreground text-xs">
-                  {cartCount}
+                  {totalItems}
                 </Badge>
               )}
             </Button>
@@ -160,21 +193,24 @@ const Header = () => {
         </div>
 
         {/* Mobile Search */}
-        <div className="md:hidden mt-4">
+        <form onSubmit={handleSearch} className="md:hidden mt-4">
           <div className="relative">
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search gadgets..."
               className="search-input w-full pr-12"
             />
             <Button 
+              type="submit"
               size="sm" 
               className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full btn-primary"
             >
               <Search className="w-4 h-4" />
             </Button>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* Mobile Menu */}
@@ -189,17 +225,17 @@ const Header = () => {
             <div className="container mx-auto px-4 py-4">
               <div className="grid grid-cols-2 gap-3">
                 {categories.map((category, index) => (
-                  <motion.a
+                  <motion.button
                     key={category.name}
-                    href="#"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={() => handleCategoryClick(category.name)}
+                    className="flex items-center gap-2 p-3 rounded-lg bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors text-left"
                   >
                     <category.icon className="w-5 h-5" />
                     <span className="text-sm font-medium">{category.name}</span>
-                  </motion.a>
+                  </motion.button>
                 ))}
               </div>
             </div>
