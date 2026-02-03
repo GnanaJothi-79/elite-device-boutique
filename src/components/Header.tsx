@@ -63,7 +63,7 @@ const Header = () => {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <span>🚀 Free shipping on orders over $50 | Same day delivery available</span>
           <div className="flex gap-4">
-            <button onClick={() => navigate('/cart')} className="hover:text-accent transition-colors">Track Order</button>
+            <button onClick={() => navigate('/orders')} className="hover:text-accent transition-colors">My Orders</button>
             <a href="#" className="hover:text-accent transition-colors">Help & Support</a>
           </div>
         </div>
