@@ -172,7 +172,7 @@ const Cart = () => {
                   </div>
                 )}
 
-                <Button className="w-full btn-accent rounded-xl text-lg py-6">
+                <Button onClick={() => navigate('/checkout')} className="w-full btn-accent rounded-xl text-lg py-6">
                   <CreditCard className="w-5 h-5 mr-2" />
                   Proceed to Checkout
                 </Button>

@@ -10,7 +10,7 @@ const CartDrawer = () => {
 
   const handleCheckout = () => {
     setIsCartOpen(false);
-    navigate('/cart');
+    navigate('/checkout');
   };
 
   return (
