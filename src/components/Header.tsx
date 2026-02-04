@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   ShoppingCart, 
-  User, 
   Menu, 
   X, 
   ChevronDown,
@@ -17,6 +16,7 @@ import {
   Camera,
   Heart
 } from 'lucide-react';
+import UserMenu from '@/components/UserMenu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
@@ -176,9 +176,7 @@ const Header = () => {
               )}
             </Button>
 
-            <Button variant="ghost" size="icon" className="hidden sm:flex text-foreground hover:bg-secondary">
-              <User className="w-5 h-5" />
-            </Button>
+            <UserMenu />
 
             {/* Mobile Menu Toggle */}
             <Button
