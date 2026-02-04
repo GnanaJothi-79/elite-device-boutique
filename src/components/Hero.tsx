@@ -62,7 +62,11 @@ const Hero = () => {
               transition={{ delay: 0.5 }}
               className="flex flex-wrap gap-4"
             >
-              <Button size="lg" className="btn-accent rounded-full px-8 text-lg group">
+              <Button 
+                size="lg" 
+                className="btn-accent rounded-full px-8 text-lg group"
+                onClick={() => document.getElementById('featured-products')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 Shop Now
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -70,6 +74,7 @@ const Hero = () => {
                 size="lg" 
                 variant="outline" 
                 className="rounded-full px-8 text-lg border-background/30 text-background hover:bg-background/10"
+                onClick={() => document.getElementById('deals-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 View Deals
               </Button>
