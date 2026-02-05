@@ -38,12 +38,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('mongodb-auth', {
-        body: { email, password },
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      // Add action as query param workaround
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mongodb-auth?action=login`,
         {
