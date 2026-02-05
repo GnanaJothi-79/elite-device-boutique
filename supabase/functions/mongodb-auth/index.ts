@@ -11,50 +11,19 @@ interface UserData {
   name?: string;
 }
 
+// Simple in-memory store for demo (in production, use proper MongoDB Data API)
+// This persists across function invocations within the same instance
+const users = new Map<string, { id: string; email: string; name: string; passwordHash: string; createdAt: string }>();
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
-  }
-
-  const MONGODB_URI = Deno.env.get('MONGODB_URI');
-  if (!MONGODB_URI) {
-    return new Response(JSON.stringify({ error: 'MongoDB not configured' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   }
 
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
     const body: UserData = await req.json();
-
-    // Parse MongoDB URI to extract cluster info
-    const mongoUrlMatch = MONGODB_URI.match(/mongodb\+srv:\/\/([^:]+):([^@]+)@([^\/]+)\/?(.*)?/);
-    if (!mongoUrlMatch) {
-      throw new Error('Invalid MongoDB URI format');
-    }
-
-    const [, username, password, cluster, dbName = 'gadgethub'] = mongoUrlMatch;
-    const dataApiUrl = `https://data.mongodb-api.com/app/data-${cluster.split('.')[0]}/endpoint/data/v1/action`;
-
-    // Use MongoDB Data API
-    const apiKey = Deno.env.get('MONGODB_API_KEY') || password;
-    
-    const mongoRequest = async (actionName: string, document: Record<string, unknown>, filter?: Record<string, unknown>) => {
-      const payload: Record<string, unknown> = {
-        dataSource: cluster.split('.')[0],
-        database: dbName,
-        collection: 'users',
-      };
-      
-      if (document) payload.document = document;
-      if (filter) payload.filter = filter;
-
-      // Fallback: Use simple in-memory simulation for demo
-      // In production, you'd use MongoDB Atlas Data API or a proper driver
-      return { success: true };
-    };
 
     if (action === 'signup') {
       const { email, password: userPassword, name } = body;
@@ -66,16 +35,25 @@ serve(async (req) => {
         });
       }
 
-      // Create user object with hashed password (simplified for demo)
+      // Check if user already exists
+      if (users.has(email.toLowerCase())) {
+        return new Response(JSON.stringify({ error: 'User already exists. Please login instead.' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Create user object with hashed password
       const user = {
         id: crypto.randomUUID(),
-        email,
+        email: email.toLowerCase(),
         name: name || email.split('@')[0],
-        password: btoa(userPassword), // Base64 encode (use bcrypt in production)
+        passwordHash: btoa(userPassword), // Base64 encode (use bcrypt in production)
         createdAt: new Date().toISOString(),
       };
 
-      // Store in a simple way - in production use proper MongoDB connection
+      // Store user
+      users.set(email.toLowerCase(), user);
       console.log('User signup:', { email, name: user.name });
 
       return new Response(JSON.stringify({ 
@@ -96,22 +74,38 @@ serve(async (req) => {
         });
       }
 
-      // Demo login - in production, verify against MongoDB
-      console.log('User login attempt:', email);
+      // Find user
+      const storedUser = users.get(email.toLowerCase());
+      
+      if (!storedUser) {
+        console.log('Login failed - user not found:', email);
+        return new Response(JSON.stringify({ 
+          error: 'User not found. Please sign up first.' 
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
-      // Simulate successful login
-      const user = {
-        id: crypto.randomUUID(),
-        email,
-        name: email.split('@')[0],
-      };
+      // Verify password
+      if (storedUser.passwordHash !== btoa(userPassword)) {
+        console.log('Login failed - wrong password:', email);
+        return new Response(JSON.stringify({ 
+          error: 'Invalid password. Please try again.' 
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log('User login success:', email);
 
       // Generate simple session token
-      const token = btoa(JSON.stringify({ userId: user.id, exp: Date.now() + 86400000 }));
+      const token = btoa(JSON.stringify({ userId: storedUser.id, exp: Date.now() + 86400000 }));
 
       return new Response(JSON.stringify({ 
         success: true, 
-        user,
+        user: { id: storedUser.id, email: storedUser.email, name: storedUser.name },
         token,
       }), {
         status: 200,
