@@ -26,7 +26,7 @@ const App = () => (
           <OrderProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter basename="/elite-device-boutique/">
               <CartDrawer />
               <Routes>
                 <Route path="/" element={<Index />} />
