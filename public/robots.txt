@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gnanaJothi-79.github.io/elite-device-boutique/sitemap.xml
+Sitemap: https://gnanajothi-79.github.io/elite-device-boutique/sitemap.xml
