@@ -15,6 +15,7 @@ import Footer from '@/components/Footer';
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { addOrder } = useOrders();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [step, setStep] = useState<'shipping' | 'payment' | 'processing' | 'success'>('shipping');
