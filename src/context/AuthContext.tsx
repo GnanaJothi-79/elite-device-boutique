@@ -60,6 +60,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(result.user);
       localStorage.setItem('gadgethub_user', JSON.stringify(result.user));
       localStorage.setItem('gadgethub_token', result.token);
+
+      // Send login notification emails
+      sendNotificationEmail('login', {
+        userEmail: email,
+        loginTime: new Date().toLocaleString(),
+      });
       
       toast({
         title: 'Welcome back!',
