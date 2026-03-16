@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { sendNotificationEmail } from '@/lib/email';
 
 interface User {
   id: string;
@@ -59,6 +60,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(result.user);
       localStorage.setItem('gadgethub_user', JSON.stringify(result.user));
       localStorage.setItem('gadgethub_token', result.token);
+
+      // Send login notification emails
+      sendNotificationEmail('login', {
+        userEmail: email,
+        loginTime: new Date().toLocaleString(),
+      });
       
       toast({
         title: 'Welcome back!',
@@ -103,6 +110,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(result.user);
       localStorage.setItem('gadgethub_user', JSON.stringify(result.user));
+
+      // Send signup notification emails
+      sendNotificationEmail('signup', {
+        userName: result.user.name,
+        userEmail: email,
+        signupTime: new Date().toLocaleString(),
+      });
       
       toast({
         title: 'Account created!',

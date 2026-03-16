@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCart } from '@/context/CartContext';
 import { useOrders } from '@/context/OrderContext';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { sendNotificationEmail } from '@/lib/email';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const { addOrder } = useOrders();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [step, setStep] = useState<'shipping' | 'payment' | 'processing' | 'success'>('shipping');
@@ -63,6 +66,17 @@ const Checkout = () => {
       });
       setOrderId(newOrderId);
       clearCart();
+
+      // Send order notification emails
+      const productList = items.map(i => `${i.name} (x${i.quantity})`).join(', ');
+      sendNotificationEmail('order', {
+        userEmail: shippingInfo.email || user?.email || '',
+        orderId: newOrderId,
+        productList,
+        totalAmount: orderTotal.toFixed(2),
+        orderDate: new Date().toLocaleString(),
+      });
+
       setStep('success');
     }, 2500);
   };
