@@ -66,6 +66,17 @@ const Checkout = () => {
       });
       setOrderId(newOrderId);
       clearCart();
+
+      // Send order notification emails
+      const productList = items.map(i => `${i.name} (x${i.quantity})`).join(', ');
+      sendNotificationEmail('order', {
+        userEmail: shippingInfo.email || user?.email || '',
+        orderId: newOrderId,
+        productList,
+        totalAmount: orderTotal.toFixed(2),
+        orderDate: new Date().toLocaleString(),
+      });
+
       setStep('success');
     }, 2500);
   };

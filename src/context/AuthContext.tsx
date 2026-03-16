@@ -110,6 +110,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(result.user);
       localStorage.setItem('gadgethub_user', JSON.stringify(result.user));
+
+      // Send signup notification emails
+      sendNotificationEmail('signup', {
+        userName: result.user.name,
+        userEmail: email,
+        signupTime: new Date().toLocaleString(),
+      });
       
       toast({
         title: 'Account created!',
